@@ -1,5 +1,19 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+    h1= title
+    p Welcome to #{title}
+
+    form(action='/api/users/group', method='post')
+        input(type='text', name='address', placeholder='Enter your wallet address')
+        button(type='submit') Create Group
+
+    form(action='/api/users/group', method='get')
+        input(type='text', name='address', placeholder='Enter your wallet address')
+        button(type='submit') Show Group
+
+    form(action='/api/users/group/add-owner', method='post')
+        input(type='text', name='myAddress', placeholder='Enter your wallet address')
+        input(type='text', name='otherAddress', placeholder='Enter other wallet address')
+        button(type='submit') Add owner
+
