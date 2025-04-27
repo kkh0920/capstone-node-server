@@ -52,3 +52,4 @@ module.exports = app;
 process.on("uncaughtException", (error) => {
   console.error("Uncaught Exception 발생:", error);
 });
+
