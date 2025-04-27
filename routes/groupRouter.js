@@ -5,20 +5,17 @@ const crypto = require('crypto');
 const Safe = require('@safe-global/protocol-kit')
 const config = require('../config');
 const axios = require('axios');
-const test = require("node:test");
 
 const safeVersion = '1.4.1' // optional parameter
 
 const provider = new ethers.JsonRpcProvider(config.RPC_URL);
 const client = new ethers.Wallet(config.SIGNER_PRIVATE_KEY, provider);
 
-const testGroup = '0x32AC49E67e2df69b0b669Eb1bdFc7Fd4b8802F02'
-
 // TODO: 기본적으로 1인 당 1개의 그룹에 속해있을 수 있다.
 
-// 그룹 조회
+// 그룹 조회 API
 router.get('/api/group', async function (req, res, next) {
-    const memberAddress = req.query.address
+    const memberAddress = req.query.memberAddress
     console.log("Your Address: " + memberAddress);
 
     const safeWallet = await axios.get(config.SPRING_SERVER_URI + '/api/group/' + memberAddress);
@@ -52,7 +49,7 @@ router.get('/api/group', async function (req, res, next) {
 // 그룹 생성 API
 router.post('/api/group', async function (req, res, next) {
     // 1. 그룹 생성을 위한 ProtocolKit 초기화
-    const memberAddress = req.body.address;
+    const memberAddress = req.body.memberAddress;
     console.log("Member address: " + memberAddress);
     const safeAccountConfig = {
         owners: [memberAddress, config.SIGNER_ADDRESS],
@@ -101,7 +98,7 @@ router.post('/api/group/add-owner', async function (req, res, next) {
     // TODO: 그룹 초대 요청 테이블에 있는 요청 데이터를 제거한다. "요청이 없으면" 에러 리턴
 
     const groupAddress = req.body.groupAddress;
-    const myAddress = req.body.myAddress;
+    const memberAddress = req.body.memberAddress;
     console.log("Group address: " + groupAddress + '\n' + "Your address: " + myAddress);
 
     const protocolKit = await Safe.default.init({
@@ -110,7 +107,7 @@ router.post('/api/group/add-owner', async function (req, res, next) {
         safeAddress: groupAddress
     });
     const addOwnerTransaction = await protocolKit.createAddOwnerTx({
-        ownerAddress: myAddress,
+        ownerAddress: memberAddress,
         threshold: 1
     });
     await protocolKit.signTransaction(addOwnerTransaction);
@@ -119,16 +116,26 @@ router.post('/api/group/add-owner', async function (req, res, next) {
     res.status(200);
 });
 
-// 그룹 초대 요청 API (groupAddress, otherAddress)
-router.post('/api/group/request', async function (req, res, next) {
-    const groupAddress = req.body.groupAddress;
+// 그룹 초대 요청 조회 API (memberAddress)
+router.get('/api/group/request', async function (req, res, next) {
+    const memberAddress = req.query.memberAddress;
 
-    // 2. TODO: Spring Database에 접근해서 otherAddress 사용자가 속해있는 그룹을 가져온다. "존재하면" 에러 리턴
-    // TODO: otherAddress 사용자가 회원으로 가입되어있지 않으면 에러 리턴
+    // TODO: 1. Spring Database에 접근
+    // TODO: 2. 회원 체크: memberAddress
+    // TODO: 3. memberAddress로 그룹 초대 요청 테이블 값을 가져오고 프론트에 전달
+})
+
+// 그룹 초대 요청 API (memberAddress, otherAddress)
+router.post('/api/group/request', async function (req, res, next) {
+    const memberAddress = req.body.memberAddress;
     const otherAddress = req.body.otherAddress;
 
-    // 3. TODO: Spring Database에 접근해서 PK(groupAddress, otherAddress) 값을 그룹 초대 요청 테이블에 저장한다. 이미 요청이 있으면 에러 리턴
-    // 사용자가 초대 수락을 누르면 서명 후 그룹 구성원 가입 API를 호출하는 방식
+    // TODO: 1. Spring Database에 접근
+    // TODO: 2. 회원 체크: memberAddress, otherAddress
+    // TODO: 3. 그룹 체크 1: memberAddress 사용자 그룹이 "존재하지 않으면" 에러
+    // TODO: 4. 그룹 체크 2: otherAddress 사용자 그룹이 "존재하면" 에러
+    // TODO: 5. 그룹 초대 요청 테이블 저장: (memberAddress의 그룹 주소, otherAddress) (이미 요청이 있으면 에러 리턴)
+    // 이후, 사용자가 초대 수락을 누르면 서명 후 그룹 구성원 가입 API를 호출하는 방식
 });
 
 router.get('/', function(req, res, next) {

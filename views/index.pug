@@ -4,16 +4,16 @@ block content
     h1= title
     p Welcome to #{title}
 
-    form(action='/api/group', method='post')
-        input(type='text', name='address', placeholder='Enter your wallet address')
-        button(type='submit') Create Group
-
     form(action='/api/group', method='get')
-        input(type='text', name='address', placeholder='Enter your wallet address')
+        input(type='text', name='memberAddress', placeholder='Your address')
         button(type='submit') Show Group
 
+    form(action='/api/group', method='post')
+        input(type='text', name='memberAddress', placeholder='Your address')
+        button(type='submit') Create Group
+
     form(action='/api/group/join', method='post')
-        input(type='text', name='groupAddress', placeholder='Enter your wallet address')
-        input(type='text', name='myAddress', placeholder='Enter other wallet address')
-        button(type='submit') Add owner
+        input(type='text', name='groupAddress', placeholder='Group address')
+        input(type='text', name='memberAddress', placeholder='Your address')
+        button(type='submit') Join group
 
