@@ -4,9 +4,49 @@ const { Web3 } = require("web3");
 const web3 = new Web3(new Web3.providers.HttpProvider(config.RPC_URL));
 const contract = new web3.eth.Contract(config.CONTRACT_ABI, config.CONTRACT_ADDRESS);
 
-async function getTickets(groupAddress) {
-    return await contract.methods.getTickets(groupAddress).call();
+/* ---------------------------- Ticket method ---------------------------- */
+
+async function getTickets(walletAddress) {
+    return await contract.methods.getTickets(walletAddress).call();
 }
+
+async function mintTicket(from, to, tokenUri) {
+    try {
+        const tx = contract.methods.mintTicket(from, to, tokenUri);
+        return await sendSignedTransaction(tx);
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function shareTicket(memberAddress, tokenId) {
+    try {
+        const tx = contract.methods.shareTicket(memberAddress, tokenId);
+        return await sendSignedTransaction(tx);
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function cancelShareTicket(memberAddress, tokenId) {
+    try {
+        const tx = contract.methods.cancelShareTicket(memberAddress, tokenId);
+        return await sendSignedTransaction(tx);
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function burnTicket(IssuerAddress, tokenId) {
+    try {
+        const tx = contract.methods.cancelShareTicket(IssuerAddress, tokenId);
+        return await sendSignedTransaction(tx);
+    } catch (error) {
+        throw error;
+    }
+}
+
+/* ---------------------------- Group method ---------------------------- */
 
 async function joinGroup(memberAddress, groupAddress) {
     try {
@@ -42,6 +82,8 @@ async function isGroupMember(memberAddress) {
     }
 }
 
+/* ------------------------------------------------------------------------------------ */
+
 async function sendSignedTransaction(tx) {
     try {
         const feeData = await web3.eth.getBlock("latest");
@@ -73,9 +115,11 @@ async function sendSignedTransaction(tx) {
 }
 
 module.exports = {
+    // Ticket methods
     getTickets,
-    joinGroup,
-    leaveGroup,
-    getGroup,
-    isGroupMember
+    mintTicket, shareTicket, cancelShareTicket, burnTicket, // 상태 변경: gas 비용 발생
+
+    // Group methods
+    getGroup, isGroupMember,
+    joinGroup, leaveGroup, // 상태 변경: gas 비용 발생
 }

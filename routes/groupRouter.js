@@ -104,13 +104,17 @@ router.post('/api/group/request', async function (req, res, next) {
     const memberAddress = req.body.memberAddress;
     const otherAddress = req.body.otherAddress;
 
-    // TODO: 1. web3.js를 통해 그룹을 가져온다. (요청 데이터: memberAddress)
-    // TODO:    1.1. 그룹 체크 1: memberAddress 사용자 그룹이 "존재하지 않으면" 에러
-    // TODO:    1.2. 그룹 체크 2: otherAddress 사용자 그룹이 "존재하면" 에러
+    if (await contract.isGroupMember(otherAddress)) {
+        console.log(otherAddress + "is already group member");
+        res.status(400).send(otherAddress + "is already group member");
+        return;
+    }
 
-    // TODO: 2. Spring Database에 접근 (요청 데이터: memberAddress, otherAddress, groupAddress)
-    // TODO:    2.1. 회원 체크 후 그룹 초대 요청 테이블 저장: (groupAddress, otherAddress)
-    // TODO:    2.2. 이미 요청이 있으면 에러 리턴
+    const groupAddress = await contract.getGroup(memberAddress);
+
+    // TODO: Spring Database에 접근 (요청 데이터: memberAddress, otherAddress, groupAddress)
+    // TODO:    1. 회원 체크 후 그룹 초대 요청 테이블 저장: (groupAddress, otherAddress)
+    // TODO:    2. 이미 요청이 있으면 에러 리턴
 
     // 이후, 사용자가 초대 수락을 누르면 서명 후 그룹 구성원 가입 API를 호출하는 방식
 });
