@@ -12,6 +12,10 @@ block content
         input(type='text', name='memberAddress', placeholder='Your address')
         button(type='submit') Create Group
 
+    form(action='/api/group/leave', method='post')
+        input(type='text', name='memberAddress', placeholder='Your address')
+        button(type='submit') Leave group
+
     form(action='/api/group/join', method='post')
         input(type='text', name='groupAddress', placeholder='Group address')
         input(type='text', name='memberAddress', placeholder='Your address')

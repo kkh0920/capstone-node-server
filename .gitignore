@@ -1,5 +1,5 @@
 .DS_Store
 .idea
-config.js
+src/config.js
 node_modules
 bin
