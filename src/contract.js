@@ -11,107 +11,71 @@ async function getTickets(walletAddress) {
 }
 
 async function mintTicket(from, to, tokenUri) {
-    try {
-        const tx = contract.methods.mintTicket(from, to, tokenUri);
-        return await sendSignedTransaction(tx);
-    } catch (error) {
-        throw error;
-    }
+    const tx = contract.methods.mintTicket(from, to, tokenUri);
+    return await sendSignedTransaction(tx);
 }
 
 async function shareTicket(memberAddress, tokenId) {
-    try {
-        const tx = contract.methods.shareTicket(memberAddress, tokenId);
-        return await sendSignedTransaction(tx);
-    } catch (error) {
-        throw error;
-    }
+    const tx = contract.methods.shareTicket(memberAddress, tokenId);
+    return await sendSignedTransaction(tx);
 }
 
 async function cancelShareTicket(memberAddress, tokenId) {
-    try {
-        const tx = contract.methods.cancelShareTicket(memberAddress, tokenId);
-        return await sendSignedTransaction(tx);
-    } catch (error) {
-        throw error;
-    }
+    const tx = contract.methods.cancelShareTicket(memberAddress, tokenId);
+    return await sendSignedTransaction(tx);
 }
 
 async function burnTicket(IssuerAddress, tokenId) {
-    try {
-        const tx = contract.methods.cancelShareTicket(IssuerAddress, tokenId);
-        return await sendSignedTransaction(tx);
-    } catch (error) {
-        throw error;
-    }
+    const tx = contract.methods.cancelShareTicket(IssuerAddress, tokenId);
+    return await sendSignedTransaction(tx);
 }
 
 /* ---------------------------- Group method ---------------------------- */
 
 async function joinGroup(memberAddress, groupAddress) {
-    try {
-        const tx = contract.methods.joinGroup(memberAddress,  groupAddress);
-        return await sendSignedTransaction(tx);
-    } catch (error) {
-        throw error;
-    }
+    const tx = contract.methods.joinGroup(memberAddress,  groupAddress);
+    return await sendSignedTransaction(tx);
 }
 
 async function leaveGroup(memberAddress) {
-    try {
-        const tx = contract.methods.leaveGroup(memberAddress);
-        return await sendSignedTransaction(tx);
-    } catch (error) {
-        throw error;
-    }
+    const tx = contract.methods.leaveGroup(memberAddress);
+    return await sendSignedTransaction(tx);
 }
 
 async function getGroup(memberAddress) {
-    try {
-        return await contract.methods.getGroup(memberAddress).call();
-    } catch (error) {
-        throw error;
-    }
+    return await contract.methods.getGroup(memberAddress).call();
 }
 
 async function isGroupMember(memberAddress) {
-    try {
-        return await contract.methods.isGroupMember(memberAddress).call();
-    } catch (error) {
-        throw error;
-    }
+    return await contract.methods.isGroupMember(memberAddress).call();
 }
 
 /* ------------------------------------------------------------------------------------ */
 
 async function sendSignedTransaction(tx) {
-    try {
-        const feeData = await web3.eth.getBlock("latest");
+    const feeData = await web3.eth.getBlock("latest");
 
-        const data = tx.encodeABI();
-        const gas = await tx.estimateGas({from: config.SIGNER_ADDRESS});
-        const maxPriority = web3.utils.toWei('2', 'gwei');
-        const maxFee = Number(feeData.baseFeePerGas) + Number(maxPriority);
-        const nonce = await web3.eth.getTransactionCount(config.SIGNER_ADDRESS);
+    const data = tx.encodeABI();
+    const gas = await tx.estimateGas({from: config.SIGNER_ADDRESS});
+    const maxPriority = web3.utils.toWei('2', 'gwei');
+    const maxFee = Number(feeData.baseFeePerGas) + Number(maxPriority);
+    const nonce = await web3.eth.getTransactionCount(config.SIGNER_ADDRESS);
 
-        const signedTx = await web3.eth.accounts.signTransaction(
-            {
-                to: config.CONTRACT_ADDRESS,
-                data: data,
-                gas: gas,
-                maxPriorityFeePerGas: maxPriority,
-                maxFeePerGas: maxFee,
-                nonce: nonce,
-                chainId: config.CHAIN_ID,
-            },
-            config.SIGNER_PRIVATE_KEY
-        );
+    const signedTx = await web3.eth.accounts.signTransaction(
+        {
+            to: config.CONTRACT_ADDRESS,
+            data: data,
+            gas: gas,
+            maxPriorityFeePerGas: maxPriority,
+            maxFeePerGas: maxFee,
+            nonce: nonce,
+            chainId: config.CHAIN_ID,
+        },
+        config.SIGNER_PRIVATE_KEY
+    );
 
-        const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-        return receipt.transactionHash;
-    } catch (error) {
-        throw error;
-    }
+    const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+    return receipt.transactionHash;
 }
 
 module.exports = {
