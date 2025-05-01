@@ -24,7 +24,7 @@ router.get('/api/group', async function (req, res, next) {
         });
     } catch (error) {
         console.log(error);
-        res.status(500).send('failed to get group');
+        res.status(500).send({ message: 'failed to get group' });
     }
 });
 
@@ -37,7 +37,7 @@ router.post('/api/group', async function (req, res, next) {
         await axios.get(config.SPRING_SERVER_URI + '/api/user/validate/' + memberAddress);
         if (await contract.isGroupMember(memberAddress)) {
             console.log("Already group member");
-            res.status(400).send('Already group member');
+            res.status(400).send({ message: 'Already group member' });
             return;
         }
         // 그룹 생성 (Safe Wallet 트랜잭션) & 블록체인에 그룹 정보 저장
@@ -51,7 +51,7 @@ router.post('/api/group', async function (req, res, next) {
         });
     } catch (error) {
         console.log(error);
-        res.status(500).send('failed to create group');
+        res.status(500).send({ message: 'failed to create group' });
     }
 });
 
@@ -61,10 +61,10 @@ router.post('/api/group/leave', async function (req, res, next) {
         const memberAddress = req.body.memberAddress;
         console.log("Member address: " + memberAddress);
         await contract.leaveGroup(memberAddress);
-        res.status(200).send('Group left successfully');
+        res.status(200).send({ message: 'Group left successfully' });
     } catch (error) {
         console.log(error);
-        res.status(500).send('failed to leave group');
+        res.status(500).send({ message: 'failed to leave group' });
     }
 })
 
@@ -87,7 +87,7 @@ router.post('/api/group/add-owner', async function (req, res, next) {
         });
     } catch (error) {
         console.log(error);
-        res.status(500).send('failed to add owner');
+        res.status(500).send({ message: 'failed to add owner' });
     }
 });
 
@@ -106,7 +106,7 @@ router.post('/api/group/request', async function (req, res, next) {
 
     if (await contract.isGroupMember(otherAddress)) {
         console.log(otherAddress + "is already group member");
-        res.status(400).send(otherAddress + "is already group member");
+        res.status(400).send({ message: " This address already group member" });
         return;
     }
 
