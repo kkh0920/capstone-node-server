@@ -106,7 +106,7 @@ router.post('/api/group/request', async function (req, res, next) {
 
     if (await contract.isGroupMember(otherAddress)) {
         console.log(otherAddress + "is already group member");
-        res.status(400).send(otherAddress + "is already group member");
+        res.status(400).send("This member is already group member");
         return;
     }
 
