@@ -9,9 +9,12 @@ router.post('/api/ticket/buy', async function (req, res) {
         const from = req.body.from; // 이벤트 주최자 주소
         const to = req.body.to; // 구매자 주소
         const tokenUri = "test";
-        console.log('from: ' + from + ', to: ' + to + ', tokenUri: ' + tokenUri);
 
         await contract.mintTicket(from, to, tokenUri);
+
+        console.log('--------- Ticket Buy ---------');
+        console.log('from: ' + from + ', to: ' + to + ', tokenUri: ' + tokenUri);
+        console.log('------------------------------\n');
 
         // TODO: 민트 성공 시, IPFS에 이벤트(티켓) 데이터 저장
 
@@ -32,10 +35,16 @@ router.get('/api/ticket', async function (req, res) {
         for (let i = 0; i < ticketDetails[0].length; i++) {
             tokens[i] = {
                 tokenId: parseInt(ticketDetails[0][i]), // tokenId를 정수로 변환
-                tokenUri: ticketDetails[1][i] // IPFS URI
+                tokenUri: ticketDetails[1][i], // IPFS URI
+                issuer: ticketDetails[2][i], // 이벤트 주최자 주소
+                buyer: ticketDetails[3][i] // 구매자 주소
             }
         }
-        console.log('tokens: ', tokens);
+
+        console.log('--------- Personal Ticket Info ---------');
+        console.log("Your Address: ", memberAddress);
+        console.log('Tickets: ', tokens);
+        console.log('----------------------------------------\n');
 
         // TODO: 가져온 tokenUri를 통해 IPFS에 저장된 이벤트(티켓) 데이터 가져오기
 

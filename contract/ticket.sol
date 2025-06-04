@@ -38,10 +38,11 @@ contract Ticket is ERC721Enumerable, IERC5484 {
     }
 
     mapping(uint256 => TicketDetails) private ticketDetails;
-    mapping(address => address) private groups; 
-    
+    mapping(address => address) private groups;
+    mapping(address => address[]) owners;
+
     constructor() ERC721("EventTicket", "ticketSBT") {} // string memory _name, string memory _symbol
-    
+
     /* --------------------- Ticket method ------------------ */
 
     function tokenURI(uint256 _tokenId) override view public returns (string memory) {
@@ -67,17 +68,22 @@ contract Ticket is ERC721Enumerable, IERC5484 {
         return tokenId;
     }
 
-    function getTickets(address _ticketOwner) view public returns (uint256[] memory, string[] memory) {
+    function getTickets(address _ticketOwner) view public returns (uint256[] memory, string[] memory, address[] memory, address[] memory) {
         uint256 balance = balanceOf(_ticketOwner);
         uint256[] memory tokenId = new uint256[](balance);
         string[] memory tokenUri = new string[](balance);
+        address[] memory issuer = new address[](balance);
+        address[] memory buyer = new address[](balance);
 
         for (uint256 i = 0; i < balance; i++) {
             tokenId[i] = tokenOfOwnerByIndex(_ticketOwner, i);
             tokenUri[i] = tokenURI(tokenId[i]);
+            issuer[i] = ticketDetails[tokenId[i]].issuer;
+            buyer[i] = ticketDetails[tokenId[i]].buyer;
         }
 
-        return (tokenId, tokenUri);
+        // return (tokenId, tokenUri);
+        return (tokenId, tokenUri, issuer, buyer);
     }
 
     function shareTicket(address _from, uint256 _tokenId) public {
@@ -124,16 +130,29 @@ contract Ticket is ERC721Enumerable, IERC5484 {
     function joinGroup(address _member, address _group) public {
         require(groups[_member] == address(0x0), "This member is already in the group");
         groups[_member] = _group;
+        owners[_group].push(_member);
     }
 
     function leaveGroup(address _member) public {
         require(groups[_member] != address(0x0), "This member has no group");
-        
+
         // 그룹 탈퇴 시, 그룹에 공유 중인 티켓을 본인 지갑으로 옮긴다.
-        (uint256[] memory id, ) = getTickets(groups[_member]);
+        (uint256[] memory id, , , ) = getTickets(groups[_member]);
         for (uint256 i = 0; i < id.length; i++) {
             if (_member == ticketDetails[id[i]].buyer) {
-                cancelShareTicket(_member, id[i]); 
+                cancelShareTicket(_member, id[i]);
+            }
+        }
+
+        // 그룹 구성원 정보 제거
+        address[] storage owner = owners[groups[_member]];
+        for (uint256 i = 0; i < owner.length; i++) {
+            if (_member == owner[i]) {
+                for (uint256 j = i; j < owner.length - 1; j++) {
+                    owner[j] = owner[j + 1];
+                }
+                owner.pop();
+                break;
             }
         }
 
@@ -143,6 +162,10 @@ contract Ticket is ERC721Enumerable, IERC5484 {
     function getGroup(address _member) public view returns(address) {
         require(groups[_member] != address(0x0), "This member has no group");
         return groups[_member];
+    }
+
+    function getOwners(address _group) public view returns(address[] memory) {
+        return owners[_group];
     }
 
     function isGroupMember(address _member) public view returns (bool) {

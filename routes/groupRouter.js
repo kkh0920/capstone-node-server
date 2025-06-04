@@ -10,19 +10,26 @@ router.get('/api/group', async function (req, res, next) {
     try {
         const memberAddress = req.query.memberAddress
         const groupAddress = await contract.getGroup(memberAddress);
-        console.log("Your Address: " + memberAddress + "\nGroup address: " + groupAddress);
 
         // TODO: 가져온 tokenUri를 통해 IPFS에 저장된 이벤트(티켓) 데이터 가져오기
         const owners = await contract.getOwners(groupAddress); // 1. 그룹 구성원
         const ticketDetails = await contract.getTickets(groupAddress);  // 2. 그룹 티켓 (tokenId, ipfsUri)
+
         let tokens = [];
         for (let i = 0; i < ticketDetails[0].length; i++) {
             tokens[i] = {
                 tokenId: parseInt(ticketDetails[0][i]), // tokenId를 정수로 변환
-                tokenUri: ticketDetails[1][i] // IPFS URI
+                tokenUri: ticketDetails[1][i], // IPFS URI
+                issuer: ticketDetails[2][i], // 이벤트 주최자 주소
+                buyer: ticketDetails[3][i] // 구매자 주소
             }
         }
-        console.log('Owner: ' + owners + '\nTicket: ' + tokens);
+        console.log('-------------- Group Info --------------');
+        console.log("Your Address: ", memberAddress);
+        console.log("Group Address: ", groupAddress);
+        console.log('Owners: ', owners);
+        console.log('Tokens: ', tokens);
+        console.log('----------------------------------------\n');
 
         res.status(200).send({
             groupAddress: groupAddress,
@@ -39,6 +46,8 @@ router.get('/api/group', async function (req, res, next) {
 router.post('/api/group', async function (req, res, next) {
     try {
         const memberAddress = req.body.memberAddress;
+
+        console.log("-------------- Group Create --------------");
         console.log("Member address: " + memberAddress);
         // 회원 체크 & 그룹 유무 체크
         await axios.get(config.SPRING_SERVER_URI + '/api/user/validate/' + memberAddress);
@@ -51,13 +60,16 @@ router.post('/api/group', async function (req, res, next) {
         const groupAddress = await safe.createGroup();
         const transactionHash = await contract.joinGroup(memberAddress, groupAddress);
 
-        console.log('group created: ' + groupAddress + '\ncontract transaction hash: ' + transactionHash);
+        console.log('Group Address: ' + groupAddress);
+        console.log('----------------------------------------\n');
+
         res.status(200).send({
             groupAddress: groupAddress,
             transactionHash: transactionHash
         });
     } catch (error) {
         console.log(error);
+        console.log('----------------------------------------\n');
         res.status(500).send('failed to create group');
     }
 });
