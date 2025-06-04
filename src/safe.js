@@ -17,9 +17,9 @@ async function getOwners(safeAddress) {
     return owners.filter(owner => owner !== config.SIGNER_ADDRESS);
 }
 
-async function createGroup(memberAddress) {
+async function createGroup() {
     const safeAccountConfig = {
-        owners: [memberAddress, config.SIGNER_ADDRESS],
+        owners: [config.SIGNER_ADDRESS],
         threshold: 1
     }
     const predictSafe = {

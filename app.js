@@ -16,10 +16,15 @@ app.use(cors());
 /* ------------------------------------------------------------ */
 /* ----------------------  route setup  ------------------------ */
 
+let indexRouter = require('./routes/index');
 let groupRouter = require('./routes/groupRouter');
+let ticketRouter = require('./routes/ticketRouter');
 
+app.use('/', indexRouter);
 app.use('/', groupRouter);
-app.use('/api/group', groupRouter);
+app.use('/', ticketRouter);
+// app.use('/api/group', groupRouter);
+// app.use('/api/ticket', ticketRouter);
 
 /* ------------------------------------------------------------ */
 /* ------------------------------------------------------------ */

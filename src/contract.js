@@ -46,6 +46,10 @@ async function getGroup(memberAddress) {
     return await contract.methods.getGroup(memberAddress).call();
 }
 
+async function getOwners(groupAddress) {
+    return await contract.methods.getOwners(groupAddress).call();
+}
+
 async function isGroupMember(memberAddress) {
     return await contract.methods.isGroupMember(memberAddress).call();
 }
@@ -84,6 +88,6 @@ module.exports = {
     mintTicket, shareTicket, cancelShareTicket, burnTicket, // 상태 변경: gas 비용 발생
 
     // Group methods
-    getGroup, isGroupMember,
+    getGroup, getOwners, isGroupMember,
     joinGroup, leaveGroup, // 상태 변경: gas 비용 발생
 }

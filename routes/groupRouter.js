@@ -13,14 +13,21 @@ router.get('/api/group', async function (req, res, next) {
         console.log("Your Address: " + memberAddress + "\nGroup address: " + groupAddress);
 
         // TODO: 가져온 tokenUri를 통해 IPFS에 저장된 이벤트(티켓) 데이터 가져오기
-        const owners = await safe.getOwners(groupAddress); // 1. 그룹 구성원
+        const owners = await contract.getOwners(groupAddress); // 1. 그룹 구성원
         const ticketDetails = await contract.getTickets(groupAddress);  // 2. 그룹 티켓 (tokenId, ipfsUri)
-        console.log('Owner: ' + owners + '\nTicket: ' + ticketDetails);
+        let tokens = [];
+        for (let i = 0; i < ticketDetails[0].length; i++) {
+            tokens[i] = {
+                tokenId: parseInt(ticketDetails[0][i]), // tokenId를 정수로 변환
+                tokenUri: ticketDetails[1][i] // IPFS URI
+            }
+        }
+        console.log('Owner: ' + owners + '\nTicket: ' + tokens);
 
         res.status(200).send({
             groupAddress: groupAddress,
             owners: owners,
-            ticketDetails: ticketDetails
+            tokens: tokens
         });
     } catch (error) {
         console.log(error);
@@ -41,7 +48,7 @@ router.post('/api/group', async function (req, res, next) {
             return;
         }
         // 그룹 생성 (Safe Wallet 트랜잭션) & 블록체인에 그룹 정보 저장
-        const groupAddress = await safe.createGroup(memberAddress);
+        const groupAddress = await safe.createGroup();
         const transactionHash = await contract.joinGroup(memberAddress, groupAddress);
 
         console.log('group created: ' + groupAddress + '\ncontract transaction hash: ' + transactionHash);
@@ -69,7 +76,7 @@ router.post('/api/group/leave', async function (req, res, next) {
 })
 
 // 그룹 구성원 가입 API (groupAddress, otherAddress 필요)
-router.post('/api/group/add-owner', async function (req, res, next) {
+router.post('/api/group/join', async function (req, res, next) {
     try {
         const groupAddress = req.body.groupAddress;
         const memberAddress = req.body.memberAddress;
@@ -78,13 +85,9 @@ router.post('/api/group/add-owner', async function (req, res, next) {
         // TODO: Spring DB의 그룹 초대 요청 테이블에 있는 초대 요청 데이터를 제거한다. (요청 데이터: groupAddress, memberAddress)
         // TODO: "요청이 없으면" 에러 리턴
 
-        // 그룹 구성원 추가 (Safe Wallet 트랜잭션) & 블록체인에 그룹 정보 저장
-        await safe.addOwner(memberAddress, groupAddress);
-        const transactionHash = await contract.joinGroup(memberAddress, groupAddress);
+        await contract.joinGroup(memberAddress, groupAddress);
 
-        res.status(200).send({
-            transactionHash: transactionHash
-        });
+        res.status(200).send("Group joined successfully");
     } catch (error) {
         console.log(error);
         res.status(500).send('failed to add owner');
@@ -103,6 +106,7 @@ router.get('/api/group/request', async function (req, res, next) {
 router.post('/api/group/request', async function (req, res, next) {
     const memberAddress = req.body.memberAddress;
     const otherAddress = req.body.otherAddress;
+    console.log("Member address: " + memberAddress + '\n' + "Other address: " + otherAddress);
 
     if (await contract.isGroupMember(otherAddress)) {
         console.log(otherAddress + "is already group member");
@@ -111,16 +115,14 @@ router.post('/api/group/request', async function (req, res, next) {
     }
 
     const groupAddress = await contract.getGroup(memberAddress);
+    console.log("Group address: " + groupAddress);
 
     // TODO: Spring Database에 접근 (요청 데이터: memberAddress, otherAddress, groupAddress)
     // TODO:    1. 회원 체크 후 그룹 초대 요청 테이블 저장: (groupAddress, otherAddress)
     // TODO:    2. 이미 요청이 있으면 에러 리턴
 
     // 이후, 사용자가 초대 수락을 누르면 서명 후 그룹 구성원 가입 API를 호출하는 방식
-});
-
-router.get('/', async function (req, res, next) {
-    res.render('index', { title: 'Express' });
+    res.status(200).send('Request sent successfully');
 });
 
 module.exports = router;

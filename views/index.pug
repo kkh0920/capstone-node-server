@@ -21,3 +21,11 @@ block content
         input(type='text', name='memberAddress', placeholder='Your address')
         button(type='submit') Join group
 
+    form(action='/api/ticket/buy', method='post')
+        input(type='text', name='from', placeholder='from')
+        input(type='text', name='to', placeholder='to')
+        button(type='submit') Buy Ticket
+
+    form(action='/api/ticket', method='get')
+        input(type='text', name='memberAddress', placeholder='memberAddress')
+        button(type='submit') Show Ticket
