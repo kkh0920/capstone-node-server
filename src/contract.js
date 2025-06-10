@@ -15,6 +15,21 @@ async function mintTicket(from, to, tokenUri) {
     return await sendSignedTransaction(tx);
 }
 
+async function useTickets(memberAddress, tokenId) {
+    const tx = contract.methods.useTickets(memberAddress, tokenId);
+    return await sendSignedTransaction(tx);
+}
+
+async function allowTicketUse(from, to, tokenId) {
+    const tx = contract.methods.allowTicketUse(from, to, tokenId);
+    return await sendSignedTransaction(tx);
+}
+
+async function disallowTicketUse(from, to, tokenId) {
+    const tx = contract.methods.disallowTicketUse(from, to, tokenId);
+    return await sendSignedTransaction(tx);
+}
+
 async function shareTicket(memberAddress, tokenId) {
     const tx = contract.methods.shareTicket(memberAddress, tokenId);
     return await sendSignedTransaction(tx);
@@ -85,7 +100,8 @@ async function sendSignedTransaction(tx) {
 module.exports = {
     // Ticket methods
     getTickets,
-    mintTicket, shareTicket, cancelShareTicket, burnTicket, // 상태 변경: gas 비용 발생
+    mintTicket, useTickets, allowTicketUse, disallowTicketUse, // 상태 변경: gas 비용 발생
+    shareTicket, cancelShareTicket, burnTicket, // 상태 변경: gas 비용 발생
 
     // Group methods
     getGroup, getOwners, isGroupMember,

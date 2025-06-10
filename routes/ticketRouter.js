@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const config = require('../src/config');
 const contract = require('../src/contract');
+const {convertToken} = require("../src/tokenConverter");
 
 // 티켓 구매 API (from, to)
 router.post('/api/ticket/buy', async function (req, res) {
@@ -10,10 +11,13 @@ router.post('/api/ticket/buy', async function (req, res) {
         const to = req.body.to; // 구매자 주소
         const tokenUri = "test";
 
+        console.log('--------- Ticket Buy ---------');
+        console.log('from: ' + from);
+        console.log('to: ' + to);
+        console.log('tokenUri: ' + tokenUri);
+
         await contract.mintTicket(from, to, tokenUri);
 
-        console.log('--------- Ticket Buy ---------');
-        console.log('from: ' + from + ', to: ' + to + ', tokenUri: ' + tokenUri);
         console.log('------------------------------\n');
 
         // TODO: 민트 성공 시, IPFS에 이벤트(티켓) 데이터 저장
@@ -21,6 +25,7 @@ router.post('/api/ticket/buy', async function (req, res) {
         res.status(200).send('ticket bought successfully');
     } catch (error) {
         console.log(error);
+        console.log('------------------------------\n');
         res.status(500).send('failed to buy ticket');
     }
 });
@@ -31,15 +36,7 @@ router.get('/api/ticket', async function (req, res) {
         const memberAddress = req.query.memberAddress;
         const ticketDetails = await contract.getTickets(memberAddress);
 
-        let tokens = [];
-        for (let i = 0; i < ticketDetails[0].length; i++) {
-            tokens[i] = {
-                tokenId: parseInt(ticketDetails[0][i]), // tokenId를 정수로 변환
-                tokenUri: ticketDetails[1][i], // IPFS URI
-                issuer: ticketDetails[2][i], // 이벤트 주최자 주소
-                buyer: ticketDetails[3][i] // 구매자 주소
-            }
-        }
+        let tokens = convertToken(ticketDetails);
 
         console.log('--------- Personal Ticket Info ---------');
         console.log("Your Address: ", memberAddress);
@@ -53,7 +50,30 @@ router.get('/api/ticket', async function (req, res) {
         });
     } catch (error) {
         console.log(error);
+        console.log('----------------------------------------\n');
         res.status(500).send('failed to get ticket');
+    }
+})
+
+// 티켓 사용 API (memberAddress, tokenId)
+router.post('/api/ticket/use', async function (req, res) {
+    try {
+        const memberAddress = req.body.memberAddress;
+        const tokenId = req.body.tokenId;
+
+        console.log('--------- Ticket Use ---------');
+        console.log('Member Address: ' + memberAddress);
+        console.log('Token ID: ' + tokenId);
+
+        await contract.useTickets(memberAddress, tokenId);
+
+        console.log('------------------------------\n');
+
+        res.status(200).send('ticket used successfully');
+    } catch (error) {
+        console.log(error);
+        console.log('------------------------------\n');
+        res.status(500).send('failed to use ticket');
     }
 })
 
@@ -63,11 +83,18 @@ router.post('/api/ticket/share', async function (req, res) {
        const memberAddress = req.body.memberAddress;
        const tokenId = req.body.tokenId;
 
+       console.log('--------- Personal Ticket Share ---------');
+       console.log('Member Address: ' + memberAddress);
+       console.log('Token ID: ' + tokenId);
+
        await contract.shareTicket(memberAddress, tokenId);
+
+       console.log('----------------------------------------\n');
 
        res.status(200).send('ticket shared successfully');
    } catch (error) {
        console.log(error);
+       console.log('----------------------------------------\n');
        res.status(500).send('failed to share ticket');
    }
 });
@@ -78,11 +105,18 @@ router.post('/api/ticket/cancelShare', async function (req, res) {
        const memberAddress = req.body.memberAddress;
        const tokenId = req.body.tokenId;
 
+       console.log('--------- Ticket Share Cancel ----------');
+       console.log('Member Address: ' + memberAddress);
+       console.log('Token ID: ' + tokenId);
+
        await contract.cancelShareTicket(memberAddress, tokenId);
+
+       console.log('----------------------------------------\n');
 
        res.status(200).send('ticket share cancelled successfully');
    } catch (error) {
        console.log(error);
+       console.log('----------------------------------------\n');
        res.status(500).send('failed to cancel ticket share');
    }
 });

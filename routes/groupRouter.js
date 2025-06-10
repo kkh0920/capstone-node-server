@@ -4,6 +4,7 @@ const axios = require('axios');
 const config = require('../src/config');
 const contract = require('../src/contract');
 const safe = require('../src/safe');
+const {convertToken} = require("../src/tokenConverter");
 
 // 그룹 조회 API
 router.get('/api/group', async function (req, res, next) {
@@ -15,15 +16,8 @@ router.get('/api/group', async function (req, res, next) {
         const owners = await contract.getOwners(groupAddress); // 1. 그룹 구성원
         const ticketDetails = await contract.getTickets(groupAddress);  // 2. 그룹 티켓 (tokenId, ipfsUri)
 
-        let tokens = [];
-        for (let i = 0; i < ticketDetails[0].length; i++) {
-            tokens[i] = {
-                tokenId: parseInt(ticketDetails[0][i]), // tokenId를 정수로 변환
-                tokenUri: ticketDetails[1][i], // IPFS URI
-                issuer: ticketDetails[2][i], // 이벤트 주최자 주소
-                buyer: ticketDetails[3][i] // 구매자 주소
-            }
-        }
+        let tokens = convertToken(ticketDetails);
+
         console.log('-------------- Group Info --------------');
         console.log("Your Address: ", memberAddress);
         console.log("Group Address: ", groupAddress);
@@ -49,8 +43,7 @@ router.post('/api/group', async function (req, res, next) {
 
         console.log("-------------- Group Create --------------");
         console.log("Member address: " + memberAddress);
-        // 회원 체크 & 그룹 유무 체크
-        await axios.get(config.SPRING_SERVER_URI + '/api/user/validate/' + memberAddress);
+        // 그룹 유무 체크
         if (await contract.isGroupMember(memberAddress)) {
             console.log("Already group member");
             res.status(400).send('Already group member');
@@ -130,11 +123,59 @@ router.post('/api/group/request', async function (req, res, next) {
     console.log("Group address: " + groupAddress);
 
     // TODO: Spring Database에 접근 (요청 데이터: memberAddress, otherAddress, groupAddress)
-    // TODO:    1. 회원 체크 후 그룹 초대 요청 테이블 저장: (groupAddress, otherAddress)
+    // TODO:    1. 그룹 초대 요청 테이블 저장: (groupAddress, otherAddress)
     // TODO:    2. 이미 요청이 있으면 에러 리턴
 
-    // 이후, 사용자가 초대 수락을 누르면 서명 후 그룹 구성원 가입 API를 호출하는 방식
+    // 이후, 사용자가 초대 수락을 누르면 그룹 구성원 가입 API를 호출
     res.status(200).send('Request sent successfully');
+});
+
+// 티켓 사용 허가 API (from, to, tokenId)
+router.post('/api/group/ticket/allow', async function (req, res, next) {
+    try {
+        const from = req.body.from;
+        const to = req.body.to;
+        const tokenId = req.body.tokenId;
+
+        console.log('--------- Allow Ticket Use --------')
+        console.log('From: ' + from);
+        console.log('To: ' + to);
+        console.log('Token ID: ' + tokenId);
+
+        await contract.allowTicketUse(from, to, tokenId);
+
+        console.log('------------------------------------\n');
+
+        res.status(200).send('ticket use allowed successfully');
+    } catch (error) {
+        console.log(error);
+        console.log('------------------------------------\n');
+        res.status(500).send('failed to allow ticket use');
+    }
+});
+
+// 티켓 사용 허가 철회 API (from, to, tokenId)
+router.post('/api/group/ticket/disallow', async function (req, res, next) {
+    try {
+        const from = req.body.from;
+        const to = req.body.to;
+        const tokenId = req.body.tokenId;
+
+        console.log('--------- Disallow Ticket Use --------');
+        console.log('From: ' + from);
+        console.log('To: ' + to);
+        console.log('Token ID: ' + tokenId);
+
+        await contract.disallowTicketUse(from, to, tokenId);
+
+        console.log('---------------------------------------\n');
+
+        res.status(200).send('ticket use disallowed successfully');
+    } catch (error) {
+        console.log(error);
+        console.log('---------------------------------------\n');
+        res.status(500).send('failed to disallow ticket use');
+    }
 });
 
 module.exports = router;

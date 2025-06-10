@@ -29,3 +29,30 @@ block content
     form(action='/api/ticket', method='get')
         input(type='text', name='memberAddress', placeholder='memberAddress')
         button(type='submit') Show Ticket
+
+    form(action='/api/ticket/share', method='post')
+        input(type='text', name='memberAddress', placeholder='Your address')
+        input(type='text', name='tokenId', placeholder='Ticket ID')
+        button(type='submit') Share Ticket
+
+    form(action='/api/ticket/cancelShare', method='post')
+        input(type='text', name='memberAddress', placeholder='Your address')
+        input(type='text', name='tokenId', placeholder='Ticket ID')
+        button(type='submit') Cancel Share Ticket
+
+    form(action='/api/ticket/use', method='post')
+        input(type='text', name='memberAddress', placeholder='Your address')
+        input(type='text', name='tokenId', placeholder='Ticket ID')
+        button(type='submit') Use Ticket
+
+    form(action='/api/group/ticket/allow', method='post')
+        input(type='text', name='from', placeholder='from')
+        input(type='text', name='to', placeholder='to')
+        input(type='text', name='tokenId', placeholder='tokenId')
+        button(type='submit') Allow Ticket Use
+
+    form(action='/api/group/ticket/disallow', method='post')
+        input(type='text', name='from', placeholder='from')
+        input(type='text', name='to', placeholder='to')
+        input(type='text', name='tokenId', placeholder='tokenId')
+        button(type='submit') Disallow Ticket Use
