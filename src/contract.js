@@ -1,13 +1,34 @@
-const config = require("./config");
-const { Web3 } = require("web3");
+import config from "./config.js";
+import { Web3 } from "web3";
 
 const web3 = new Web3(new Web3.providers.HttpProvider(config.RPC_URL));
 const contract = new web3.eth.Contract(config.CONTRACT_ABI, config.CONTRACT_ADDRESS);
 
 /* ---------------------------- Ticket method ---------------------------- */
 
+async function tokenURI(tokenId) {
+    return await contract.methods.tokenURI(tokenId).call();
+}
+
 async function getTickets(walletAddress) {
-    return await contract.methods.getTickets(walletAddress).call();
+    const ticketDetails = await contract.methods.getTickets(walletAddress).call();
+
+    let tickets = [];
+    for (let i = 0; i < ticketDetails[0].length; i++) {
+        const res = await fetch(ticketDetails[1][i]);
+        const details = await res.json();
+        tickets[i] = {
+            tokenId: parseInt(ticketDetails[0][i]), // tokenId를 정수로 변환
+            tokenUri: ticketDetails[1][i], // URI
+            details: details, // URI에 존재하는 티켓 정보
+            issuer: ticketDetails[2][i], // 이벤트 주최자 주소
+            buyer: ticketDetails[3][i], // 구매자 주소
+            allowedUser: ticketDetails[4][i], // 티켓 사용 가능한 사용자 주소
+            isUsed: ticketDetails[5][i] // 티켓 사용 여부
+        }
+    }
+
+    return tickets;
 }
 
 async function mintTicket(from, to, tokenUri) {
@@ -41,7 +62,7 @@ async function cancelShareTicket(memberAddress, tokenId) {
 }
 
 async function burnTicket(IssuerAddress, tokenId) {
-    const tx = contract.methods.cancelShareTicket(IssuerAddress, tokenId);
+    const tx = contract.methods.burnTicket(IssuerAddress, tokenId);
     return await sendSignedTransaction(tx);
 }
 
@@ -97,12 +118,11 @@ async function sendSignedTransaction(tx) {
     return receipt.transactionHash;
 }
 
-module.exports = {
+export default {
     // Ticket methods
-    getTickets,
+    tokenURI, getTickets,
     mintTicket, useTickets, allowTicketUse, disallowTicketUse, // 상태 변경: gas 비용 발생
     shareTicket, cancelShareTicket, burnTicket, // 상태 변경: gas 비용 발생
-
     // Group methods
     getGroup, getOwners, isGroupMember,
     joinGroup, leaveGroup, // 상태 변경: gas 비용 발생

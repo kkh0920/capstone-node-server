@@ -1,10 +1,8 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const axios = require('axios');
-const config = require('../src/config');
-const contract = require('../src/contract');
-const safe = require('../src/safe');
-const {convertToken} = require("../src/tokenConverter");
+
+import contract from '../src/contract.js';
+import safe from '../src/safe.js';
 
 // 그룹 조회 API
 router.get('/api/group', async function (req, res, next) {
@@ -12,26 +10,25 @@ router.get('/api/group', async function (req, res, next) {
         const memberAddress = req.query.memberAddress
         const groupAddress = await contract.getGroup(memberAddress);
 
-        // TODO: 가져온 tokenUri를 통해 IPFS에 저장된 이벤트(티켓) 데이터 가져오기
-        const owners = await contract.getOwners(groupAddress); // 1. 그룹 구성원
-        const ticketDetails = await contract.getTickets(groupAddress);  // 2. 그룹 티켓 (tokenId, ipfsUri)
-
-        let tokens = convertToken(ticketDetails);
-
         console.log('-------------- Group Info --------------');
         console.log("Your Address: ", memberAddress);
         console.log("Group Address: ", groupAddress);
+
+        const owners = await contract.getOwners(groupAddress); // 1. 그룹 구성원
+        const tickets = await contract.getTickets(groupAddress);  // 2. 그룹 티켓 (tokenId, ipfsUri)
+
         console.log('Owners: ', owners);
-        console.log('Tokens: ', tokens);
+        console.log('Tickets: ', tickets);
         console.log('----------------------------------------\n');
 
         res.status(200).send({
             groupAddress: groupAddress,
             owners: owners,
-            tokens: tokens
+            tokens: tickets
         });
     } catch (error) {
         console.log(error);
+        console.log('----------------------------------------\n');
         res.status(500).send('failed to get group');
     }
 });
@@ -43,6 +40,7 @@ router.post('/api/group', async function (req, res, next) {
 
         console.log("-------------- Group Create --------------");
         console.log("Member address: " + memberAddress);
+
         // 그룹 유무 체크
         if (await contract.isGroupMember(memberAddress)) {
             console.log("Already group member");
@@ -71,8 +69,13 @@ router.post('/api/group', async function (req, res, next) {
 router.post('/api/group/leave', async function (req, res, next) {
     try {
         const memberAddress = req.body.memberAddress;
+
+        console.log("-------------- Group Leave --------------");
         console.log("Member address: " + memberAddress);
+        console.log('----------------------------------------\n');
+
         await contract.leaveGroup(memberAddress);
+
         res.status(200).send('Group left successfully');
     } catch (error) {
         console.log(error);
@@ -141,15 +144,13 @@ router.post('/api/group/ticket/allow', async function (req, res, next) {
         console.log('From: ' + from);
         console.log('To: ' + to);
         console.log('Token ID: ' + tokenId);
+        console.log('------------------------------------\n');
 
         await contract.allowTicketUse(from, to, tokenId);
-
-        console.log('------------------------------------\n');
 
         res.status(200).send('ticket use allowed successfully');
     } catch (error) {
         console.log(error);
-        console.log('------------------------------------\n');
         res.status(500).send('failed to allow ticket use');
     }
 });
@@ -165,17 +166,15 @@ router.post('/api/group/ticket/disallow', async function (req, res, next) {
         console.log('From: ' + from);
         console.log('To: ' + to);
         console.log('Token ID: ' + tokenId);
+        console.log('---------------------------------------\n');
 
         await contract.disallowTicketUse(from, to, tokenId);
-
-        console.log('---------------------------------------\n');
 
         res.status(200).send('ticket use disallowed successfully');
     } catch (error) {
         console.log(error);
-        console.log('---------------------------------------\n');
         res.status(500).send('failed to disallow ticket use');
     }
 });
 
-module.exports = router;
+export default router;

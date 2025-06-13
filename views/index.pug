@@ -56,3 +56,8 @@ block content
         input(type='text', name='to', placeholder='to')
         input(type='text', name='tokenId', placeholder='tokenId')
         button(type='submit') Disallow Ticket Use
+
+    form(action='/api/ticket/burn', method='post')
+        input(type='text', name='issuerAddress', placeholder='issuer address')
+        input(type='text', name='tokenId', placeholder='Ticket ID')
+        button(type='submit') Burn Ticket
