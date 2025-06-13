@@ -1,35 +1,35 @@
-let createError = require('http-errors');
-let express = require('express');
-let path = require('path');
-let cookieParser = require('cookie-parser');
-let logger = require('morgan');
+import createError from 'http-errors';
+import express from 'express';
+import path from 'path';
+import cookieParser from 'cookie-parser';
+import logger from 'morgan';
+import { fileURLToPath } from 'url';
 
 let app = express();
 
-const bodyParser = require('body-parser');
+import bodyParser from 'body-parser';
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-const cors = require('cors');
+import cors from 'cors';
 app.use(cors());
 
 /* ------------------------------------------------------------ */
 /* ----------------------  route setup  ------------------------ */
 
-let homeRouter = require('./routes/homeRouter');
-let groupRouter = require('./routes/groupRouter');
-let ticketRouter = require('./routes/ticketRouter');
+import homeRouter from './routes/homeRouter.js';
+import groupRouter from './routes/groupRouter.js';
+import ticketRouter from './routes/ticketRouter.js';
 
 app.use('/', homeRouter);
 app.use('/', groupRouter);
 app.use('/', ticketRouter);
-// app.use('/api/group', groupRouter);
-// app.use('/api/ticket', ticketRouter);
 
 /* ------------------------------------------------------------ */
 /* ------------------------------------------------------------ */
 
 // view engine setup
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
@@ -55,10 +55,9 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
-
 // 에러 발생해도 서버가 꺼지지 않게 강제
 process.on("uncaughtException", (error) => {
   console.error("Uncaught Exception 발생:", error);
 });
 
+export default app;

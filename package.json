@@ -2,6 +2,7 @@
   "name": "gateway",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "start": "node ./bin/www"
   },
@@ -9,6 +10,7 @@
     "@safe-global/api-kit": "^3.0.1",
     "@safe-global/protocol-kit": "^6.0.3",
     "@safe-global/safe-core-sdk": "^3.3.5",
+    "@web3-storage/w3up-client": "^17.3.0",
     "axios": "^1.9.0",
     "body-parser": "^2.2.0",
     "cookie-parser": "~1.4.4",
@@ -21,7 +23,9 @@
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
+    "multiformats": "^13.3.7",
     "pug": "2.0.0-beta11",
-    "web3": "^4.16.0"
+    "web3": "^4.16.0",
+    "web3.storage": "^4.5.5"
   }
 }

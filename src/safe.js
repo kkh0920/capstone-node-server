@@ -1,7 +1,7 @@
-const config = require("./config");
-const crypto = require("crypto");
-const { ethers } = require('ethers');
-const Safe = require('@safe-global/protocol-kit')
+import config from "./config.js";
+import crypto from "crypto";
+import { ethers } from 'ethers';
+import Safe from '@safe-global/protocol-kit';
 
 const safeVersion = '1.4.1' // optional parameter
 
@@ -63,7 +63,7 @@ async function addOwner(memberAddress, groupAddress) {
     await protocolKit.executeTransaction(addOwnerTransaction);
 }
 
-module.exports = {
+export default {
     createGroup,
     getOwners,
     addOwner
