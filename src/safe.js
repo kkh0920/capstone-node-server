@@ -9,7 +9,7 @@ const provider = new ethers.JsonRpcProvider(config.RPC_URL);
 const client = new ethers.Wallet(config.SIGNER_PRIVATE_KEY, provider);
 
 async function getOwners(safeAddress) {
-    const protocolKit = await Safe.default.init({
+    const protocolKit = await Safe.init({
         provider: config.RPC_URL,
         safeAddress: safeAddress
     });
@@ -29,7 +29,7 @@ async function createGroup() {
             safeVersion: safeVersion
         }
     }
-    const protocolKit = await Safe.default.init({
+    const protocolKit = await Safe.init({
         provider: config.RPC_URL,
         predictedSafe: predictSafe
     })
@@ -50,7 +50,7 @@ async function createGroup() {
 }
 
 async function addOwner(memberAddress, groupAddress) {
-    const protocolKit = await Safe.default.init({
+    const protocolKit = await Safe.init({
         provider: config.RPC_URL,
         signer: config.SIGNER_PRIVATE_KEY, // executeTransaction을 통해 트랜잭션을 수행하기 위해서 signer가 필요함.
         safeAddress: groupAddress
