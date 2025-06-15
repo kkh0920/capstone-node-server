@@ -2,4 +2,3 @@
 .idea
 src/config.js
 node_modules
-bin
