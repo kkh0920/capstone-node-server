@@ -44,6 +44,7 @@ contract Ticket is ERC721Enumerable, IERC5484 {
     mapping(uint256 => TicketDetails) private ticketDetails;
     mapping(address => address) private groups;
     mapping(address => address[]) owners;
+    mapping(address => address[]) invites;
 
     constructor() ERC721("EventTicket", "ticketSBT") {} // string memory _name, string memory _symbol
 
@@ -64,13 +65,10 @@ contract Ticket is ERC721Enumerable, IERC5484 {
             _tokenURI,
             _from,
             _to,
-            new address[](MAX_GROUP_MEMBER),
+            new address[](0),
             false,
             auth
         );
-        while (ticketDetails[tokenId].allowedUsers.length > 0) {
-            ticketDetails[tokenId].allowedUsers.pop();
-        }
         ticketDetails[tokenId].allowedUsers.push(_to);
 
         emit Issued(_from, _to, tokenId, auth);
@@ -145,7 +143,6 @@ contract Ticket is ERC721Enumerable, IERC5484 {
             isUsed[i] = ticketDetails[tokenId[i]].isUsed;
         }
 
-        // return (tokenId, tokenUri);
         return (tokenId, tokenUri, issuer, buyer, allowedUser, isUsed);
     }
 
@@ -190,11 +187,54 @@ contract Ticket is ERC721Enumerable, IERC5484 {
 
     /* --------------------- Group method ------------------ */
 
-    function joinGroup(address _member, address _group) public {
+    function createGroup(address _member, address _group) public {
         require(groups[_member] == address(0x0), "This member is already in the group");
-        require(owners[_group].length < MAX_GROUP_MEMBER, "The group is full");
+        require(owners[_group].length == 0, "This group is already created");
         groups[_member] = _group;
         owners[_group].push(_member);
+        delete invites[_member];
+    }
+
+    function inviteToGroup(address _from, address _to) public {
+        require(groups[_from] != address(0x0), "This member has no group");
+        require(groups[_to] == address(0x0), "This member is already in the group");
+        for (uint256 i = 0; i < invites[_to].length; i++) {
+            if (invites[_to][i] == groups[_from]) {
+                revert("This group is already invited");
+            }
+        }
+        invites[_to].push(groups[_from]);
+    }
+
+    function getInvites(address _member) public view returns (address[] memory) {
+        return invites[_member];
+    }
+
+    function rejectInvite(address _member, address _group) public {
+        for (uint256 i = 0; i < invites[_member].length; i++) {
+            if (invites[_member][i] == _group) {
+                for (uint256 j = i; j < invites[_member].length - 1; j++) {
+                    invites[_member][j] = invites[_member][j + 1];
+                }
+                invites[_member].pop();
+                return;
+            }
+        }
+        revert("This group is not invited");
+    }
+
+    function acceptInvite(address _member, address _group) public {
+        require(groups[_member] == address(0x0), "This member is already in the group");
+        require(owners[_group].length < MAX_GROUP_MEMBER, "The group is full");
+        for (uint256 i = 0; i < invites[_member].length; i++) {
+            if (invites[_member][i] == _group) {
+                groups[_member] = _group;
+                owners[_group].push(_member);
+                delete invites[_member]; // clear invites after joining
+                return;
+            }
+        }
+        revert("This group is not invited");
     }
 
     function leaveGroup(address _member) public {

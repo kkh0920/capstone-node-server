@@ -18,7 +18,15 @@ router.post('/api/ticket/buy', async function (req, res) {
     try {
         const from = req.body.from; // 이벤트 주최자 주소
         const to = req.body.to; // 구매자 주소
-        const details = req.body.details; // 티켓 정보 (이벤트 이름, 날짜, 위치, 가격, 좌석 번호 등)
+        // const details = req.body.details; // 티켓 정보 (이벤트 이름, 날짜, 위치, 가격, 좌석 번호 등)
+        const details = {
+            eventName: 'Event XYZ',
+            eventDate: '2023-12-31',
+            eventLocation: 'Seoul, South Korea',
+            price: 100000,
+            seatNumber: 'A1',
+            additionalInfo: 'VIP access with backstage pass'
+        }
 
         console.log('--------- Ticket Buy ---------');
         console.log('from: ' + from);

@@ -68,8 +68,27 @@ async function burnTicket(IssuerAddress, tokenId) {
 
 /* ---------------------------- Group method ---------------------------- */
 
-async function joinGroup(memberAddress, groupAddress) {
-    const tx = contract.methods.joinGroup(memberAddress,  groupAddress);
+async function createGroup(memberAddress, groupAddress) {
+    const tx = contract.methods.createGroup(memberAddress, groupAddress);
+    return await sendSignedTransaction(tx);
+}
+
+async function inviteToGroup(from, to) {
+    const tx = contract.methods.inviteToGroup(from, to);
+    return await sendSignedTransaction(tx);
+}
+
+async function getInvites(memberAddress) {
+    return await contract.methods.getInvites(memberAddress).call();
+}
+
+async function rejectInvite(memberAddress, groupAddress) {
+    const tx = contract.methods.rejectInvite(memberAddress, groupAddress);
+    return await sendSignedTransaction(tx);
+}
+
+async function acceptInvite(memberAddress, groupAddress) {
+    const tx = contract.methods.acceptInvite(memberAddress,  groupAddress);
     return await sendSignedTransaction(tx);
 }
 
@@ -121,9 +140,9 @@ async function sendSignedTransaction(tx) {
 export default {
     // Ticket methods
     tokenURI, getTickets,
-    mintTicket, useTickets, allowTicketUse, disallowTicketUse, // 상태 변경: gas 비용 발생
-    shareTicket, cancelShareTicket, burnTicket, // 상태 변경: gas 비용 발생
+    mintTicket, useTickets, allowTicketUse, disallowTicketUse,
+    shareTicket, cancelShareTicket, burnTicket,
     // Group methods
-    getGroup, getOwners, isGroupMember,
-    joinGroup, leaveGroup, // 상태 변경: gas 비용 발생
+    getGroup, getOwners, isGroupMember, getInvites,
+    createGroup, inviteToGroup, rejectInvite, acceptInvite, leaveGroup,
 }
