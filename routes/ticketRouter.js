@@ -154,7 +154,7 @@ router.post('/api/ticket/burn', async function (req, res) {
         console.log('CID: ' + cid);
 
         // Web3 Storage 에서 티켓 데이터 삭제 & 컨트랙트에서 티켓 소각
-        await client.remove(CID.parse(cid), { shards: false });
+        // await client.remove(CID.parse(cid), { shards: false });
         await contract.burnTicket(issuerAddress, tokenId);
         console.log('-------------------------------\n');
 
