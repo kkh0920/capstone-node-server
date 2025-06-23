@@ -12,6 +12,8 @@
 <img width="685" alt="architecture" src="https://github.com/user-attachments/assets/bc14a096-95a6-45e2-b52b-4b5bee9102fb" />
 
 ## 2025 한국정보기술학회 대학생논문경진대회 금상
+<img width="650" alt="금상" src="https://github.com/user-attachments/assets/686ed4fd-b16f-4069-aaea-b94a4ec3fc80" />
+
 
 ### 학회 발표 영상
 [![Watch the video](http://img.youtube.com/vi/bMFtUKPceiI/0.jpg)](https://youtu.be/bMFtUKPceiI)
